@@ -52,18 +52,20 @@ def play_connect_four(Local = False):
 	play_again_text_surf = font_small.render("SPACE to play again", True, color1)
 	play_again_text_rect = play_again_text_surf.get_rect(bottomright = (width - 10, height - 25))
 
-	# Funciones de lógica y mostrar elementos en pantalla
+	full_row_text_surf = font_small.render("Row is full", True, color1)
+	full_row_text_rect = full_row_text_surf.get_rect(bottomleft = (20, height - 25))
+
+	# Funciones de lógica y mostrar elementos en pantalla.
+
+	# Función que crea un tablero vacío con espacios que representan la ausencia de un token.
 	def create_board():
 		return [[" " for i in range(7)] for i in range(6)]
 
+	# Función para añadir un token al tablero. Si la columna está llena, levanta un error que es atrapado por la estructura try-except que altera una variable para mostrar en pantalla que el movimiento no es válido
 	def add_token(token, board, pos):
-		if pos < 0 or pos > 6:
-			raise ValueError
-		
 		i = -1
 		
 		if board[0][pos].strip():
-			print("This row is full")
 			raise ValueError
 		
 		while True:
@@ -74,7 +76,8 @@ def play_connect_four(Local = False):
 				i -= 1
 			
 		return board
-		
+	
+	# Función que verifica las diferentes formas de ganar en Connect4
 	def check_winner(board):
 		# Check for rows
 		for row in board:
@@ -111,11 +114,13 @@ def play_connect_four(Local = False):
 		else:
 			return False
 	
+	# Mostrar los elementos de la pantalla inicial
 	def render_start():
 		screen.blit(main_start_text_surf, main_start_text_rect)
 		screen.blit(start_text1_surf, start_text1_rect)
 		screen.blit(start_text2_surf, start_text2_rect)
 
+	# Mostrar los elementos de la pantalla principal
 	def render_board(board):
 		pygame.draw.rect(screen, color3, board_rect, border_radius = 10)
 		for i in range(len(board)):
@@ -131,6 +136,8 @@ def play_connect_four(Local = False):
 	scene = "start"
 	board = create_board()
 	turn = 0
+	is_valid = True
+	winner = False
 
 	# Bucle principal
 	while game_active:
@@ -159,19 +166,35 @@ def play_connect_four(Local = False):
 			render_board(board)
 			screen.blit(turn_text_surf, turn_text_rect)
 
-			if not check_winner(board):
+			# Si en el tablero no hay ganador, espera a un input del usuario. Cuando haya uno, verifica si hay ganador
+			if not winner:
 				if mouse_pressed[0] and board_rect.collidepoint(mouse_pos):
-					col = ((mouse_pos[0] - 40)  // 7 // 25) % 7
+					col = ((mouse_pos[0] - 40)  // 7 // 25) % 7 # Encontrar la columna adecuada basado en la posición del mouse
 					if turn == 0:
-						board = add_token("0", board, col)
-						turn_text_surf = font_small.render("It's Player 2 turn!", True, color1)
-						turn = 1
-						sleep(0.5)
+						try:
+							board = add_token("0", board, col)
+							turn_text_surf = font_small.render("It's Player 2 turn!", True, color1)
+							turn = 1
+							is_valid = True
+							winner = check_winner(board)
+							sleep(0.5)
+						except:
+							is_valid = False
 					else:
-						board = add_token("1", board, col)
-						turn_text_surf = font_small.render("It's Player 1 turn!", True, color1)
-						turn = 0
-						sleep(0.5)
+						try:
+							board = add_token("1", board, col)
+							turn_text_surf = font_small.render("It's Player 1 turn!", True, color1)
+							turn = 0
+							is_valid = True
+							winner = check_winner(board)
+							sleep(0.5)
+						except:
+							is_valid = False
+				
+				if not is_valid:
+					screen.blit(full_row_text_surf, full_row_text_rect)
+			
+			# Si hay ganador, esperar si los jugadores quieren jugar de nuevo
 			else:
 				screen.blit(play_again_text_surf, play_again_text_rect)
 
@@ -184,6 +207,7 @@ def play_connect_four(Local = False):
 					board = create_board()
 					turn = 0
 					turn_text_surf = font_small.render("It's Player 1 turn!", True, color1)
+					winner = False
 					
 						
 		pygame.display.update()
