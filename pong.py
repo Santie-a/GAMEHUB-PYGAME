@@ -99,14 +99,14 @@ def play_pong(local = False):
 			ball_rect.top += y_vel
 
 	# Evita que se salga por los bordes superiores (Si se mantiene dentro del marco retorna la misma velocidad en y, de lo contrario invierte la velocidad para que cambie la dirección y la retorna).
-	def ball_pos(x_vel, y_vel):
+	def ball_pos(y_vel):
 		if ball_rect.centery < 40:
 			ball_rect.centery = 40
 			y_vel *= -1
 		elif ball_rect.centery > height - 40:
 			ball_rect.centery = height - 40
 			y_vel *= -1
-		return x_vel, y_vel
+		return y_vel
 
 	# Verifica las colisiones con las raquetas
 	def paddle_collide():
@@ -162,7 +162,7 @@ def play_pong(local = False):
 				move_paddles(keys)
 
 				# Verifica la posición de la pelota.
-				x_vel, y_vel = ball_pos(x_vel, y_vel)
+				y_vel = ball_pos(y_vel)
 
 				# Verifica si alguna raqueta hace contacto con la pelota. Si hay contacto invierte la dirección en x y añade velocidad a la pelota.
 				p_collide = paddle_collide()
