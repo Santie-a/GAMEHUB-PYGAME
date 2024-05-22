@@ -132,6 +132,14 @@ def play_connect_four(Local = False):
 				elif board[i][j] == " ":
 					screen.blit(dot3_surf, (x_sep * j + 100, y_sep * i + 50))
 
+	# Verificar que sea un tablero válido
+	def check_board(board):
+		for row in board:
+			for element in row:
+				if element == " ":
+					return False
+		return True
+
 	# Variables para el juego
 	scene = "start"
 	board = create_board()
@@ -166,8 +174,11 @@ def play_connect_four(Local = False):
 			render_board(board)
 			screen.blit(turn_text_surf, turn_text_rect)
 
+			# Verificar que el tablero no esté lleno
+			tie = check_board(board)
+
 			# Si en el tablero no hay ganador, espera a un input del usuario. Cuando haya uno, verifica si hay ganador
-			if not winner:
+			if not winner and not tie:
 				if mouse_pressed[0] and board_rect.collidepoint(mouse_pos):
 					col = ((mouse_pos[0] - 40)  // 7 // 25) % 7 # Encontrar la columna adecuada basado en la posición del mouse
 					if turn == 0:
@@ -198,10 +209,13 @@ def play_connect_four(Local = False):
 			else:
 				screen.blit(play_again_text_surf, play_again_text_rect)
 
-				if turn:
-					turn_text_surf = font_small.render("Player 1 wins!", True, color1)
+				if not tie:
+					if turn:
+						turn_text_surf = font_small.render("Player 1 wins!", True, color1)
+					else:
+						turn_text_surf = font_small.render("Player 2 wins!", True, color1)
 				else:
-					turn_text_surf = font_small.render("Player 2 wins!", True, color1)
+					turn_text_surf = font_small.render("Tie", True, color1)
 
 				if keys[pygame.K_SPACE]:
 					board = create_board()
