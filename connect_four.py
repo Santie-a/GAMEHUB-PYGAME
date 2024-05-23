@@ -1,6 +1,3 @@
-import pygame.mouse
-
-
 def play_connect_four(Local = False):
 	# Framework
 	import pygame
